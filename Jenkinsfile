@@ -51,7 +51,7 @@ pipeline {
         stage ('Docker Run') {
             steps {
                 script {
-                    bat 'docker run -d --name cashier-spring -p 5000:5000 adimunawar31/cashier-spring'
+                    bat 'docker run -d --name cashier-spring -p 5001:5000 adimunawar31/cashier-spring'
                     echo 'Docker Run Completed'
                 }
             }
