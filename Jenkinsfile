@@ -8,22 +8,20 @@ pipeline {
         stage('Git Checkout') {
             steps {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/AdiMunawar31/cashier-app-sonarqube']])
-                sh 'mvn clean install'
+                bat 'mvn clean install'
                 echo 'Git Checkout Completed'
             }
         }
-
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh 'mvn clean package'
-                    sh '''mvn clean verify sonar:sonar -Dsonar.projectKey=cashier-spring -Dsonar.host.url=http://localhost:9000'''
+                    bat 'mvn clean package'
+                    bat '''mvn clean verify sonar:sonar -Dsonar.projectKey=cashier-spring -Dsonar.host.url=http://localhost:9000'''
                     echo 'SonarQube Analysis Completed'
                 }
             }
         }
-
-        stage('Quality Gate') {
+        stage("Quality Gate") {
             steps {
                 waitForQualityGate abortPipeline: true
                 echo 'Quality Gate Completed'
@@ -33,7 +31,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t adimunawar31/cashier-spring .'
+                    bat 'docker build -t adimunawar31/cashier-spring .'
                     echo 'Build Docker Image Completed'
                 }
             }
@@ -43,9 +41,9 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhub-password')]) {
-                        sh '''docker login -u adimunawar31 -p "$dockerhub-password"'''
+                        bat 'docker login -u adimunawar31 -p "%dockerhub-password%"'
                     }
-                    sh 'docker push adimunawar31/cashier-spring'
+                    bat 'docker push adimunawar31/cashier-spring'
                 }
             }
         }
@@ -53,7 +51,7 @@ pipeline {
         stage('Docker Run') {
             steps {
                 script {
-                    sh 'docker run -d --name cashier-spring -p 5001:5000 adimunawar31/cashier-spring'
+                    bat 'docker run -d --name cashier-spring -p 5001:5000 adimunawar31/cashier-spring'
                     echo 'Docker Run Completed'
                 }
             }
@@ -62,7 +60,7 @@ pipeline {
 
     post {
         always {
-            sh 'docker logout'
+            bat 'docker logout'
         }
     }
 }
